@@ -1,6 +1,108 @@
 import recipentModel from "../models/RecipentModel.js";
 import customerModel from "../models/Customermodel.js";
 import { sendSMS } from "../utils/sendSMS.js";
+import { sendWhatsApp } from "../utils/sendWhatsapp.js";
+
+
+
+// export const addRecipent = async (req, res) => {
+//   try {
+//     const {
+//       customerId,
+//       customerName,
+//       amount,
+//       vehicleNumber,
+//       fuelType,
+//       paymentStatus,
+//     } = req.body;
+
+//     const userId = req.userId;
+
+//     if (!userId) {
+//       return res.status(401).json({
+//         success: false,
+//         message: "User not authenticated",
+//       });
+//     }
+
+//     if (
+//       !customerId ||
+//       !customerName ||
+//       amount === undefined ||
+//       !vehicleNumber ||
+//       !fuelType
+//     ) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "All required fields are required",
+//       });
+//     }
+//     const customer = await customerModel.findOne({
+//       _id: customerId,
+//       userId: userId
+//     })
+//     if (!customer) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Customer not found"
+//       });
+//     }
+
+//     const receipt = await recipentModel.create({
+//       userId,
+//       customerId,
+//       customerName,
+//       amount: Number(amount),
+//       vehicleNumber,
+//       fuelType,
+//       paymentStatus: paymentStatus || "Pending",
+//     });
+
+// const smsMessage = `Hello ${customer.name}, fuel receipt added: ${fuelType}, Rs ${Number(amount)}, Vehicle ${vehicleNumber}, Payment ${paymentStatus || "Pending"}. Thank you.`;
+
+// // A failed SMS must not make the whole request fail, because the receipt is already saved
+
+// //FOR QUICK MODE
+// let smsResult;
+// try {
+//   smsResult = await sendSMS(customer.phone, smsMessage);
+// } catch (smsError) {
+//   console.error("SMS ERROR:", smsError.message);
+//   smsResult = { success: false, error: smsError.message };
+// }
+
+// // FOR DLT MODE
+// // let smsResult;
+// // try {
+// //   smsResult = await sendSMS(customer.phone, "fuelReceipt", [
+// //     customer.name,
+// //     fuelType,
+// //     Number(amount),
+// //     vehicleNumber,
+// //     paymentStatus || "Pending",
+// //   ]);
+// // } catch (smsError) {
+// //   console.error("SMS ERROR:", smsError.message);
+// //   smsResult = { success: false, error: smsError.message };
+// // }
+
+// res.status(201).json({
+//   success: true,
+//   message: "Receipt added successfully",
+//   data: receipt,
+//   sms: smsResult,
+// });
+
+//   } catch (error) {
+//     console.error("ADD RECEIPT ERROR:", error);
+
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to add receipt",
+//     });
+//   }
+// };
+
 export const addRecipent = async (req, res) => {
   try {
     const {
@@ -33,14 +135,15 @@ export const addRecipent = async (req, res) => {
         message: "All required fields are required",
       });
     }
+
     const customer = await customerModel.findOne({
       _id: customerId,
-      userId: userId
-    })
+      userId: userId,
+    });
     if (!customer) {
       return res.status(404).json({
         success: false,
-        message: "Customer not found"
+        message: "Customer not found",
       });
     }
 
@@ -54,41 +157,27 @@ export const addRecipent = async (req, res) => {
       paymentStatus: paymentStatus || "Pending",
     });
 
-const smsMessage = `Hello ${customer.name}, fuel receipt added: ${fuelType}, Rs ${Number(amount)}, Vehicle ${vehicleNumber}, Payment ${paymentStatus || "Pending"}. Thank you.`;
+    // SEND WHATSAPP AUTOMATICALLY (a failure must not fail the request, the receipt is already saved)
+    let whatsappResult;
+    try {
+      whatsappResult = await sendWhatsApp(customer.phone, "fuelReceipt", [
+        customer.name,
+        fuelType,
+        Number(amount),
+        vehicleNumber,
+        paymentStatus || "Pending",
+      ]);
+    } catch (waError) {
+      console.error("WHATSAPP ERROR:", waError.message);
+      whatsappResult = { success: false, error: waError.message };
+    }
 
-// A failed SMS must not make the whole request fail, because the receipt is already saved
-
-//FOR QUICK MODE
-let smsResult;
-try {
-  smsResult = await sendSMS(customer.phone, smsMessage);
-} catch (smsError) {
-  console.error("SMS ERROR:", smsError.message);
-  smsResult = { success: false, error: smsError.message };
-}
-
-// FOR DLT MODE
-// let smsResult;
-// try {
-//   smsResult = await sendSMS(customer.phone, "fuelReceipt", [
-//     customer.name,
-//     fuelType,
-//     Number(amount),
-//     vehicleNumber,
-//     paymentStatus || "Pending",
-//   ]);
-// } catch (smsError) {
-//   console.error("SMS ERROR:", smsError.message);
-//   smsResult = { success: false, error: smsError.message };
-// }
-
-res.status(201).json({
-  success: true,
-  message: "Receipt added successfully",
-  data: receipt,
-  sms: smsResult,
-});
-
+    res.status(201).json({
+      success: true,
+      message: "Receipt added successfully",
+      data: receipt,
+      whatsapp: whatsappResult,
+    });
   } catch (error) {
     console.error("ADD RECEIPT ERROR:", error);
 
@@ -98,7 +187,6 @@ res.status(201).json({
     });
   }
 };
-
 
 export const getUserRecipents = async (req, res) => {
   try {
