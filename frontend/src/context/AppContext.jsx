@@ -1,13 +1,11 @@
 import { createContext, useState } from "react";
 import axios from 'axios';
-import { toast } from 'react-toastify';
 import { useEffect } from "react";
 
 export const AppContext = createContext();
 
 export const AppContextProvider = (props) => {
     const backendURL = 'http://localhost:3000';
-    console.log(backendURL);
     const [isLoggedin, setisLoggedin] = useState(false);
     const [userData, setuserData] = useState(false);
 
@@ -28,9 +26,7 @@ export const AppContextProvider = (props) => {
         catch (error) {
             setuserData(null);
             setisLoggedin(false);
-            console.log("get uesr:",error.message);
         }
-        
     }
 useEffect(()=>{
     getuserdata();

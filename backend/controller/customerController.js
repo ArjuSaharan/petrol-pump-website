@@ -8,7 +8,6 @@ export const customerAdd = async (req, res) => {
     if (!name || !phone || !address) {
         return res.json({ success: false, message: "enter the complete details" });
     }
-    console.log(name, phone, address);
     try {
         const user = new customerModel({
             userId: req.userId,
@@ -77,8 +76,6 @@ export const editcustomer = async (req, res) => {
 
 export const getcustomer = async (req, res) => {
     try {
-        console.log("PARAM CUSTOMER ID:", req.params.id);
-        console.log("LOGGED USER ID:", req.userId);
         const customer = await customerModel.findOne(
             {
                 _id: req.params.id,

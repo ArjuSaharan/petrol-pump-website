@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from 'axios';
 import { AppContext } from "../context/AppContext";
@@ -6,11 +6,11 @@ import { toast } from "react-toastify";
 const PaymentDetail = () => {
   const [paymentType, setPaymentType] = useState("");
   const [amount, setAmount] = useState("");
-  const {id}=useParams();
-  const navigate=useNavigate();
-  const {backendURL}=useContext(AppContext);
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { backendURL } = useContext(AppContext);
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!paymentType) {
       alert("Please select Cash or Online");
@@ -21,22 +21,15 @@ const PaymentDetail = () => {
       alert("Please enter a valid amount");
       return;
     }
-      console.log("Payment Type:", paymentType);
-  console.log("Amount:", amount);
-  console.log("Customer ID:", id);
-  console.log("Backend URL:", backendURL);
-    try{
-      console.log("sending payment");
-        const {data}=await axios.post(`${backendURL}/amount/pay/${id}`,{
-            paymentType,amount:Number(amount)
-        },{
-            withCredentials:true,
-        })
-        console.log("data for",data);
-        console.log("success",data.success);
-        if(data.success){
-            toast.success(
-          `Payment successful. Remaining pending amount: ₹${data.totalPending}`
+    try {
+      const { data } = await axios.post(`${backendURL}/amount/pay/${id}`, {
+        paymentType, amount: Number(amount)
+      }, {
+        withCredentials: true,
+      })
+      if (data.success) {
+        toast.success(
+          `Payment successful. Remaining pending amount: ₹${data.pendingAmount.toFixed(2)}`
         );
 
         setPaymentType("");
@@ -44,13 +37,13 @@ const PaymentDetail = () => {
 
         // Go back to customer page
         navigate(`/user/view/${id}`);
-        }
+      }
     }
-    catch(error){
-        console.log(error);
-        console.log("FULL ERROR:", error);
-  console.log("STATUS:", error.response?.status);
-  console.log("BACKEND MESSAGE:", error.response?.data);
+    catch (error) {
+      console.log(error);
+      console.log("FULL ERROR:", error);
+      console.log("STATUS:", error.response?.status);
+      console.log("BACKEND MESSAGE:", error.response?.data);
 
     }
   };

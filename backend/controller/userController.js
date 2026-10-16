@@ -5,37 +5,72 @@ import jwt from 'jsonwebtoken';
 import "dotenv/config"
 import cookieParser from 'cookie-parser';
 
+
 export const userRegsiter = async (req, res) => {
     const { name, email, phone, password } = req.body;
+
     if (!name?.trim() || !email?.trim() || !password || !phone) {
-        return res.json({ success: false, message: "fill the complete details" });
-    }
-    if (!/^[6-9]\d{9}$/.test(phone)) {
         return res.status(400).json({
             success: false,
-            message: "Enter valid 10 digit Indian phone number",
+            message: "Please fill in all the required details",
         });
     }
-    try {
-        const existemail = await userModel.findOne({
-            $or: [{ email }, { phone }],
-        });
-        if (existemail) {
-            return res.json({ success: false, message: "email and phone number already registered" });
-        }
-        const hashpassword = await bcrypt.hash(password, 10);
-        const user = new userModel.create({ name, email, phone, password: hashpassword });
-        await user.save()
 
-        // genrate token
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '2d' })
-        //store in cookies
-        res.cookie('token', token, {
+    if (!/^[6-9]\d{9}$/.test(String(phone))) {
+        return res.status(400).json({
+            success: false,
+            message: "Enter a valid 10-digit Indian phone number",
+        });
+    }
+
+    try {
+        const normalizedEmail = email.trim().toLowerCase();
+
+        const existingUser = await userModel.findOne({
+            $or: [
+                { email: normalizedEmail },
+                { phone: String(phone) },
+            ],
+        });
+
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                message:
+                    existingUser.email === normalizedEmail
+                        ? "Email is already registered"
+                        : "Phone number is already registered",
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create the user correctly
+        const user = await userModel.create({
+            name: name.trim(),
+            email: normalizedEmail,
+            phone: String(phone),
+            password: hashedPassword,
+        });
+
+        // Generate JWT
+        if (!process.env.JWT_SECRET) {
+            throw new Error("JWT_SECRET is not configured");
+        }
+
+        const token = jwt.sign(
+            { id: user._id },
+            process.env.JWT_SECRET,
+            { expiresIn: "2d" }
+        );
+
+        // Store JWT in an HTTP-only cookie
+        res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.JWT_SECRET,
-            sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 2 * 24 * 60 * 60 * 1000,
+        });
 
         return res.status(201).json({
             success: true,
@@ -47,11 +82,16 @@ export const userRegsiter = async (req, res) => {
                 phone: user.phone,
             },
         });
+    } catch (error) {
+        console.error("Registration error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Unable to register user",
+        });
     }
-    catch (error) {
-        return res.json({ success: false, message: error.message });
-    }
-}
+};
+
 
 
 // user login

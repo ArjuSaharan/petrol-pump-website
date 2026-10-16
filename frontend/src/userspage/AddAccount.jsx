@@ -21,12 +21,10 @@ const AddAccount = () => {
   
   const submithandler=async(e)=>{
     e.preventDefault();
-    console.log(name,phone,address);
     try{
       axios.defaults.withCredentials=true;
       const {data}=await axios.post(backendURL +'/customer/add',{name,phone,address});
 
-      console.log("customer: ",data);
       if(data.success){
         toast.success(data.message);
         navigate('/user');

@@ -1,6 +1,6 @@
 import recipentModel from "../models/RecipentModel.js";
 import customerModel from "../models/Customermodel.js";
-import { sendSMS } from "../service/twilioService.js";
+import { sendSMS } from "../utils/sendSMS.js";
 export const addRecipent = async (req, res) => {
   try {
     const {
@@ -44,10 +44,6 @@ export const addRecipent = async (req, res) => {
       });
     }
 
-    console.log("CUSTOMER FOUND:", customer);
-    console.log("CUSTOMER PHONE:", customer.phone);
-
-
     const receipt = await recipentModel.create({
       userId,
       customerId,
@@ -58,27 +54,40 @@ export const addRecipent = async (req, res) => {
       paymentStatus: paymentStatus || "Pending",
     });
 
-    const smsMessage = `Hello ${customer.name},
-A new fuel receipt has been added to your account.
-Fuel Type: ${fuelType}
-Amount: ₹${Number(amount)}
-Vehicle Number: ${vehicleNumber}
-Payment Status: ${paymentStatus || "Pending"}
+const smsMessage = `Hello ${customer.name}, fuel receipt added: ${fuelType}, Rs ${Number(amount)}, Vehicle ${vehicleNumber}, Payment ${paymentStatus || "Pending"}. Thank you.`;
 
-Thank you.`
-      
-     const smsResult=await sendSMS(
-      customer.phone,
-      smsMessage
-     )
-     console.log("sms :" ,smsResult);
+// A failed SMS must not make the whole request fail, because the receipt is already saved
 
-    res.status(201).json({
-      success: true,
-      message: "Receipt added successfully",
-      data: receipt,
-      sms:smsResult
-    });
+//FOR QUICK MODE
+let smsResult;
+try {
+  smsResult = await sendSMS(customer.phone, smsMessage);
+} catch (smsError) {
+  console.error("SMS ERROR:", smsError.message);
+  smsResult = { success: false, error: smsError.message };
+}
+
+// FOR DLT MODE
+// let smsResult;
+// try {
+//   smsResult = await sendSMS(customer.phone, "fuelReceipt", [
+//     customer.name,
+//     fuelType,
+//     Number(amount),
+//     vehicleNumber,
+//     paymentStatus || "Pending",
+//   ]);
+// } catch (smsError) {
+//   console.error("SMS ERROR:", smsError.message);
+//   smsResult = { success: false, error: smsError.message };
+// }
+
+res.status(201).json({
+  success: true,
+  message: "Receipt added successfully",
+  data: receipt,
+  sms: smsResult,
+});
 
   } catch (error) {
     console.error("ADD RECEIPT ERROR:", error);

@@ -38,8 +38,6 @@ const [totalAccounts, setTotalAccounts] = useState(0);
             }
         );
 
-        console.log("Dashboard summary:", response.data);
-
         if (response.data.success) {
             setTotalAccounts(
                 response.data.data.totalCustomers
@@ -59,6 +57,7 @@ const getTotalPending=async()=>{
       withCredentials: true
     })
     if(data.success){
+      console.log(data)
       setTotalPending(data.totalPending);
     }
   }
@@ -76,8 +75,6 @@ const getTotalPending=async()=>{
         withCredentials:true,
       }
     );
-
-    console.log("Fuel data from DB:", response.data);
 
     if (response.data.success) {
       setpetrol(response.data.data.petrol);
@@ -120,8 +117,6 @@ const getTotalPending=async()=>{
       }
     );
 
-    console.log("Petrol update response:", response.data);
-
     if (response.data.success) {
       setpetrol(response.data.data.petrol);
       setshowpetrolpopup(false);
@@ -154,8 +149,6 @@ const getTotalPending=async()=>{
         withCredentials: true,
       }
     );
-
-    console.log("Diesel update response:", response.data);
 
     if (response.data.success) {
       setdisel(response.data.data.diesel);

@@ -59,21 +59,18 @@ const OneCustomer = () => {
     const getCustomer = async () => {
 
         try {
-            console.log("Customer ID:", id);
             const { data } = await axios.get(
                 `${backendURL}/customer/${id}`,
                 {
                     withCredentials: true
                 }
             );
-            console.log("Backend response:", data);
             if (data.success) {
                 setCustomer(data.customer);
             } else {
                 toast.error(data.message);
             }
         } catch (error) {
-            console.log("GET CUSTOMER ERROR:", error);
             toast.error(
                 error.response?.data?.message || error.message
             );
@@ -87,12 +84,9 @@ const OneCustomer = () => {
         try {
             setreceiptsLoading(true);
 
-            console.log("id:", id);
             const { data } = await axios.get(`${backendURL}/detail/recipients/${id}`, {
                 withCredentials: true,
             })
-            console.log("Receipt response:", data);
-
             if (data.success) {
                 setrecipts(data.data || []);
             } else {
@@ -102,7 +96,6 @@ const OneCustomer = () => {
             }
         }
         catch (error) {
-            console.log("GET RECEIPTS ERROR:", error);
             toast.error(
                 error.response?.data?.message ||
                 error.message
