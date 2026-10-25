@@ -16,9 +16,9 @@ const app = express();
 
 
 
-const allowedorigin = 'http://localhost:5173';
-
-app.use(cors({ origin: allowedorigin, credentials: true }))
+const allowedorigin = 'https://bishnoi-fuel.onrender.com';
+app.set("trust proxy", 1);
+app.use(cors({ origin: "https://bishnoi-fuel.onrender.com", credentials: true }))
 app.use(express.json());
 app.use(cookieParser());
 
