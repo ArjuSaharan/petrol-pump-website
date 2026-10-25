@@ -39,7 +39,7 @@ const UserNavbar = () => {
   };
 
   return (
-    <div className="fixed w-full flex justify-between items-center p-4 sm:p-6 shadow-lg rounded sm:px-24 absolute top-0">
+    <div className="flex justify-between items-center p-4 fixed top-0 left-0 right-0 h-[75px] z-50 bg-white shadow-md">
       
       {/* Logo */}
       <div className="flex gap-1">
