@@ -131,8 +131,8 @@ export const logout = async (req, res) => {
     try {
         res.clearCookie("token", {
             httpOnly: true,
-            secure: process.env.JWT_SECRET,
-            sameSite:'lax'
+            secure: true,
+            sameSite:'none'
         })
 
         return res.json({ success: true, message: "user logout successfully" });
