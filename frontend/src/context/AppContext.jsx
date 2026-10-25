@@ -5,7 +5,7 @@ import { useEffect } from "react";
 export const AppContext = createContext();
 
 export const AppContextProvider = (props) => {
-    const backendURL = 'http://localhost:3000';
+    const backendURL = 'https://bisnoi-fuels-api.onrender.com';
     const [isLoggedin, setisLoggedin] = useState(false);
     const [userData, setuserData] = useState(false);
 
