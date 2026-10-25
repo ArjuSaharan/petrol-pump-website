@@ -2,7 +2,7 @@ import express from 'express'
 import cookieParser from 'cookie-parser';
 import authroute from './routes/authroutes.js';
 import useroute from './routes/userroute.js';
-import cors from 'cors'
+import cors from 'cors';
 import customerRoute from './routes/customerroute.js';
 import recipentRoutes from './routes/recieptRoutes.js'
 import paymentRoutes from './routes/paymentRoutes.js';
@@ -16,9 +16,9 @@ const app = express();
 
 
 
-const allowedorigin = 'https://bishnoi-fuel.onrender.com';
+const allowedorigin = 'http://localhost:5173';
 app.set("trust proxy", 1);
-app.use(cors({ origin: "https://bishnoi-fuel.onrender.com", credentials: true }))
+app.use(cors({ origin: " http://localhost:5173", credentials: true }))
 app.use(express.json());
 app.use(cookieParser());
 

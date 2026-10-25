@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { FaTimes, FaPrint } from "react-icons/fa";
 
@@ -55,6 +54,10 @@ const GenerateBill = ({
     return { fromDate, toDate };
   };
 
+  // Single, consistent check for a paid receipt.
+  const isPaid = (item) =>
+    String(item.paymentStatus || "").toLowerCase() === "paid";
+
   const handleGenerateBill = () => {
     const { fromDate, toDate } = getDateRange();
 
@@ -70,16 +73,18 @@ const GenerateBill = ({
         !Number.isNaN(new Date(item.createdAt).getTime())
     );
 
+    const inRange = (item) => {
+      const date = new Date(item.createdAt);
+      return date >= fromDate && date <= toDate;
+    };
+
     // Keep the existing individual history reports.
     if (billType !== "ledger") {
       const sourceData =
         billType === "receipt" ? validReceipts : validPayments;
 
       const filteredData = sourceData
-        .filter((item) => {
-          const date = new Date(item.createdAt);
-          return date >= fromDate && date <= toDate;
-        })
+        .filter(inRange)
         .sort(
           (a, b) =>
             new Date(a.createdAt) - new Date(b.createdAt)
@@ -101,51 +106,27 @@ const GenerateBill = ({
       return;
     }
 
-    // Opening balance = transactions before the selected period.
-
-    const previousReceipts = validReceipts
-      .filter((item) => new Date(item.createdAt) < fromDate)
-      .reduce((total, item) => {
-        // Only pending receipts increase the balance
-        if (item.paymentStatus === "Paid") {
-          return total;
-        }
-
-        return total + Number(item.amount || 0);
-      }, 0);
-
-    const previousPaidReceipts = validReceipts
+    // ---------- Opening balance (everything before the period) ----------
+    // Only PENDING receipts increase what the customer owes.
+    // Paid receipts are neutral. Payments reduce the balance.
+    const previousPendingReceipts = validReceipts
       .filter(
-        (item) =>
-          item.paymentStatus === "Paid" &&
-          new Date(item.createdAt) < fromDate
+        (item) => new Date(item.createdAt) < fromDate && !isPaid(item)
       )
-      .reduce(
-        (total, item) => total + Number(item.amount || 0),
-        0
-      );
+      .reduce((total, item) => total + Number(item.amount || 0), 0);
 
     const previousPayments = validPayments
       .filter((item) => new Date(item.createdAt) < fromDate)
-      .reduce(
-        (total, item) => total + Number(item.amount || 0),
-        0
-      );
+      .reduce((total, item) => total + Number(item.amount || 0), 0);
 
-    const openingBalance =
-      previousReceipts - previousPayments;
+    const openingBalance = previousPendingReceipts - previousPayments;
 
-
-    // Combine receipts and payments into one ledger.
-
+    // ---------- Transactions inside the period ----------
     const receiptTransactions = validReceipts
-      .filter((item) => {
-        const date = new Date(item.createdAt);
-        return date >= fromDate && date <= toDate;
-      })
+      .filter(inRange)
       .map((item) => {
-        const isPaid =
-          String(item.paymentStatus || "").toLowerCase() === "paid";
+        const paid = isPaid(item);
+        const amount = Number(item.amount || 0);
 
         return {
           _id: `receipt-${item._id}`,
@@ -154,26 +135,22 @@ const GenerateBill = ({
             item.vehicleNumber || "Vehicle",
             item.fuelType || "Fuel",
             item.customerName || customer?.name || "",
-            isPaid ? "Paid Receipt" : "Pending Receipt",
+            paid ? "Paid Receipt" : "Pending Receipt",
           ]
             .filter(Boolean)
             .join(" - "),
 
-          debit: isPaid ? 0 : Number(item.amount || 0),
-          credit: isPaid ? Number(item.amount || 0) : 0,
+          // Paid receipt: shown on both sides, so the balance does not move.
+          // Pending receipt: debit only, so the balance goes up.
+          debit: amount,
+          credit: paid ? amount : 0,
 
-          transactionType: isPaid
-            ? "paid-receipt"
-            : "receipt",
+          transactionType: paid ? "paid-receipt" : "receipt",
         };
       });
 
-
     const paymentTransactions = validPayments
-      .filter((item) => {
-        const date = new Date(item.createdAt);
-        return date >= fromDate && date <= toDate;
-      })
+      .filter(inRange)
       .map((item) => ({
         _id: `payment-${item._id}`,
         date: new Date(item.createdAt),
@@ -340,12 +317,12 @@ const GenerateBill = ({
 
           {generatedBill.billType === "ledger" && (
             <>
-              {/* <div className="mb-3 flex justify-between border-y border-gray-400 py-3 text-sm font-semibold">
+              <div className="mb-3 flex justify-between border-y border-gray-400 py-3 text-sm font-semibold">
                 <span>Opening Balance</span>
                 <span>
                   ₹{balanceLabel(generatedBill.openingBalance)}
                 </span>
-              </div> */}
+              </div>
 
               <table className="mb-5 w-full border-collapse text-xs sm:text-sm">
                 <thead>
@@ -416,10 +393,10 @@ const GenerateBill = ({
               </table>
 
               <div className="ml-auto max-w-sm space-y-2 border-t-2 border-gray-800 pt-4">
-                {/* <div className="flex justify-between">
+                <div className="flex justify-between">
                   <span>Opening Balance</span>
                   <span>₹{balanceLabel(generatedBill.openingBalance)}</span>
-                </div> */}
+                </div>
                 <div className="flex justify-between">
                   <span>Total Debit</span>
                   <span>₹{money(generatedBill.debitTotal)}</span>
