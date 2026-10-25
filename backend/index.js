@@ -16,7 +16,7 @@ const app = express();
 
 
 
-const allowedorigin = 'http://localhost:5173';
+const allowedorigin = 'https://bishnoi-fuel.onrender.com';
 
 app.use(cors({ origin: allowedorigin, credentials: true }))
 app.use(express.json());
