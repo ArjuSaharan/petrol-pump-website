@@ -9,9 +9,11 @@ const PaymentDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { backendURL } = useContext(AppContext);
+  const [isSubmitting, setisSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!paymentType) {
       alert("Please select Cash or Online");
       return;
@@ -21,6 +23,7 @@ const PaymentDetail = () => {
       alert("Please enter a valid amount");
       return;
     }
+    setisSubmitting(true);
     try {
       const { data } = await axios.post(`${backendURL}/amount/pay/${id}`, {
         paymentType, amount: Number(amount)
@@ -45,6 +48,9 @@ const PaymentDetail = () => {
       console.log("STATUS:", error.response?.status);
       console.log("BACKEND MESSAGE:", error.response?.data);
 
+    }
+    finally {
+      setisSubmitting(false);
     }
   };
 
@@ -112,12 +118,19 @@ const PaymentDetail = () => {
         </div>
 
         {/* Button */}
+
         <button
           type="submit"
-          className="w-full bg-gradient-to-r from-blue-200 to-blue-700 text-white py-2.5 rounded-lg hover:bg-blue-700 transition font-bold"
+          disabled={isSubmitting}
+          className={`w-full py-2.5 rounded-lg text-white font-bold transition
+    ${isSubmitting
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-gradient-to-r from-blue-200 to-blue-700 hover:opacity-90"
+            }`}
         >
-          Update Balance
+          {isSubmitting ? "Processing Payment..." : "Update Balance"}
         </button>
+
       </form>
     </div>
   );

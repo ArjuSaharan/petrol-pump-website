@@ -15,7 +15,7 @@ const AddRecipentform = () => {
   const [vehicleNumber, setVehicleNumber] = useState("");
   const [paymentStatus, setPaymentStatus] = useState("Pending");
   const [submitting, setsubmitting] = useState(false);
-
+  const [receiptDate, setReceiptDate] = useState("");
 
   const addReceipt = async (e) => {
     e.preventDefault();
@@ -52,6 +52,7 @@ const AddRecipentform = () => {
           fuelType,
           vehicleNumber: vehicleNumber.trim().toUpperCase(),
           paymentStatus,
+          receiptDate: receiptDate || null
         },
         {
           withCredentials: true,
@@ -122,6 +123,25 @@ const AddRecipentform = () => {
                 className="w-full border rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+
+            <div className="mb-4">
+              <label className="mb-2 block font-semibold">
+                Receipt Date (Optional)
+              </label>
+
+              <input
+                type="date"
+                value={receiptDate}
+                onChange={(e) => setReceiptDate(e.target.value)}
+                max={new Date().toLocaleDateString("en-CA")}
+                className="w-full rounded-lg border border-gray-300 px-4 py-2"
+              />
+
+              <p className="mt-1 text-sm text-gray-500">
+                Leave empty to use today's date.
+              </p>
+            </div>
+
             {/* Quantity */}
             <div>
               <label className="font-semibold text-gray-700 flex items-center gap-2 mb-2">
@@ -184,8 +204,8 @@ const AddRecipentform = () => {
             type="submit"
             disabled={submitting}
             className={`mt-8 w-full py-3 rounded-xl font-bold text-lg text-white transition duration-300 ${submitting
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-blue-200 to-blue-700 hover:scale-[1.02]"
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-gradient-to-r from-blue-200 to-blue-700 hover:scale-[1.02]"
               }`}
           >
             {submitting ? "Adding Receipt..." : "Add Customer Receipt"}

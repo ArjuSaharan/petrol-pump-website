@@ -45,6 +45,9 @@ const GenerateBill = ({
       case "2month":
         fromDate.setMonth(fromDate.getMonth() - 2);
         break;
+      case "3month":
+        fromDate.setMonth(fromDate.getMonth() - 3);
+        break;
       default:
         fromDate.setDate(fromDate.getDate() - 7);
     }
@@ -99,8 +102,24 @@ const GenerateBill = ({
     }
 
     // Opening balance = transactions before the selected period.
+
     const previousReceipts = validReceipts
       .filter((item) => new Date(item.createdAt) < fromDate)
+      .reduce((total, item) => {
+        // Only pending receipts increase the balance
+        if (item.paymentStatus === "Paid") {
+          return total;
+        }
+
+        return total + Number(item.amount || 0);
+      }, 0);
+
+    const previousPaidReceipts = validReceipts
+      .filter(
+        (item) =>
+          item.paymentStatus === "Paid" &&
+          new Date(item.createdAt) < fromDate
+      )
       .reduce(
         (total, item) => total + Number(item.amount || 0),
         0
@@ -113,28 +132,42 @@ const GenerateBill = ({
         0
       );
 
-    const openingBalance = previousReceipts - previousPayments;
+    const openingBalance =
+      previousReceipts - previousPayments;
+
 
     // Combine receipts and payments into one ledger.
+
     const receiptTransactions = validReceipts
       .filter((item) => {
         const date = new Date(item.createdAt);
         return date >= fromDate && date <= toDate;
       })
-      .map((item) => ({
-        _id: `receipt-${item._id}`,
-        date: new Date(item.createdAt),
-        particulars: [
-          item.vehicleNumber || "Vehicle",
-          item.fuelType || "Fuel",
-          item.customerName || customer?.name || "",
-        ]
-          .filter(Boolean)
-          .join(" - "),
-        debit: Number(item.amount || 0),
-        credit: 0,
-        transactionType: "receipt",
-      }));
+      .map((item) => {
+        const isPaid =
+          String(item.paymentStatus || "").toLowerCase() === "paid";
+
+        return {
+          _id: `receipt-${item._id}`,
+          date: new Date(item.createdAt),
+          particulars: [
+            item.vehicleNumber || "Vehicle",
+            item.fuelType || "Fuel",
+            item.customerName || customer?.name || "",
+            isPaid ? "Paid Receipt" : "Pending Receipt",
+          ]
+            .filter(Boolean)
+            .join(" - "),
+
+          debit: isPaid ? 0 : Number(item.amount || 0),
+          credit: isPaid ? Number(item.amount || 0) : 0,
+
+          transactionType: isPaid
+            ? "paid-receipt"
+            : "receipt",
+        };
+      });
+
 
     const paymentTransactions = validPayments
       .filter((item) => {
@@ -248,6 +281,7 @@ const GenerateBill = ({
             <option value="2week">Previous 2 Weeks</option>
             <option value="1month">Previous 1 Month</option>
             <option value="2month">Previous 2 Months</option>
+            <option value="3month">Previous 3 Months</option>
           </select>
 
           <button
@@ -276,8 +310,8 @@ const GenerateBill = ({
               {generatedBill.billType === "ledger"
                 ? "CUSTOMER LEDGER STATEMENT"
                 : generatedBill.billType === "receipt"
-                ? "RECEIPT HISTORY"
-                : "PAYMENT HISTORY"}
+                  ? "RECEIPT HISTORY"
+                  : "PAYMENT HISTORY"}
             </h2>
           </div>
 

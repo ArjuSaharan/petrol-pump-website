@@ -39,7 +39,7 @@ const UserNavbar = () => {
   };
 
   return (
-    <div className="flex justify-between items-center p-4 fixed top-0 left-0 right-0 h-[75px] z-50 bg-white shadow-md">
+    <div className="flex justify-between items-center p-10 fixed top-0 left-0 right-0 h-[75px] z-50 bg-white shadow-md">
       
       {/* Logo */}
       <div className="flex gap-1">
@@ -59,7 +59,7 @@ const UserNavbar = () => {
           </span>
 
           {/* Logout dropdown */}
-          <div className="hidden group-hover:block absolute top-full left-2 shadow-lg bg-gray-200 px-4 py-2">
+          <div className="hidden group-hover:block absolute top-full right-2 shadow-lg bg-gray-200 px-5 py-2">
             
             <h4
               onClick={handleLogout}

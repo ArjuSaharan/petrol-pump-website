@@ -31,7 +31,7 @@ const Navbar = () => {
 
     }
   return (
-    <div className=' flex justify-between items-center p-4 fixed top-0 left-0 right-0 h-[75px] z-50 bg-white shadow-md'>
+    <div className=' flex justify-between items-center p-7  fixed top-0 left-0 right-0 h-[75px] z-50 bg-white shadow-md'>
         <div className='flex  gap-1'>
             <FaGasPump className='w-10 h-8'/>
             <h1 className='text-gray-900 font-bold text-2xl'>Bishnoi Fuel</h1>

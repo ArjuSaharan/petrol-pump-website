@@ -11,6 +11,7 @@ export const addRecipent = async (req, res) => {
       vehicleNumber,
       fuelType,
       paymentStatus = "Pending",
+      receiptDate,
     } = req.body;
 
     const userId = req.userId;
@@ -79,6 +80,9 @@ export const addRecipent = async (req, res) => {
       vehicleNumber: vehicleNumber.trim().toUpperCase(),
       fuelType,
       paymentStatus,
+      createdAt: receiptDate
+        ? new Date(`${receiptDate}T12:00:00.000Z`)
+        : new Date(),
     });
 
     // Only Pending receipts increase the outstanding balance
