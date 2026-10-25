@@ -5,11 +5,14 @@ import { useEffect } from "react";
 export const AppContext = createContext();
 
 export const AppContextProvider = (props) => {
-    const backendURL = 'https://bisnoi-fuels-api.onrender.com';
+    const backendURL = 'http://localhost:3000';
     const [isLoggedin, setisLoggedin] = useState(false);
     const [userData, setuserData] = useState(false);
+    const[loading,setloading]=useState(true);
+    axios.defaults.withCredentials = true;
 
     const getuserdata = async () => {
+        
         try {
             const { data } = await axios.get(backendURL + '/data/userdata', {
                 withCredentials: true,
@@ -26,6 +29,9 @@ export const AppContextProvider = (props) => {
         catch (error) {
             setuserData(null);
             setisLoggedin(false);
+        }
+        finally{
+            setloading(false);
         }
     }
 useEffect(()=>{

@@ -14,7 +14,6 @@ export const login=async (req,res)=>{
         if(!isMatch){
             return res.json({success:false,message:"invalid password"})
         }
-
         const token=jwt.sign(
             {
                 id:user._id,
