@@ -6,57 +6,74 @@ import axios from "axios";
 import { AppContext } from "../context/AppContext";
 
 const AddRecipentform = () => {
-  const navigate=useNavigate();
-  const {backendURL}=useContext(AppContext);
+  const navigate = useNavigate();
+  const { backendURL } = useContext(AppContext);
   const { id } = useParams();
-const [customerName, setCustomerName] = useState("");
-const [amount, setAmount] = useState("");
-const [fuelType, setfueltype] = useState("");
-const [vehicleNumber, setVehicleNumber] = useState("");
-const [paymentStatus, setPaymentStatus] = useState("Pending");
+  const [customerName, setCustomerName] = useState("");
+  const [amount, setAmount] = useState("");
+  const [fuelType, setfueltype] = useState("");
+  const [vehicleNumber, setVehicleNumber] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState("Pending");
+  const [submitting, setsubmitting] = useState(false);
 
-  
+
   const addReceipt = async (e) => {
-      e.preventDefault();
-  if (!customerName ||amount === "" || !vehicleNumber ||  !fuelType) {
-    alert("Please fill all fields");
-    return;
-  }
-  try {
-    const {data} = await axios.post(
-      `${backendURL}/detail/recipients/${id}`,
-      {
-        customerId: id,
-        customerName,
-        amount: Number(amount),
-        fuelType,
-        vehicleNumber,
-        paymentStatus
-      },
-      {
-        withCredentials:true,
-      }
-    );
+    e.preventDefault();
 
+    // Prevent duplicate submissions
+    if (submitting) return;
 
-    if (data.success) {
-     toast.success("Receipt Addes successfully");
-     navigate(`/user/view/${id}`)
-
+    if (
+      !customerName.trim() ||
+      amount === "" ||
+      !vehicleNumber.trim() ||
+      !fuelType
+    ) {
+      toast.error("Please fill all fields");
+      return;
     }
-  } catch (error) {
-    console.error("ADD RECEIPT ERROR:", error);
-    console.error(
-      "SERVER RESPONSE:",
-      error.response?.data
-    );
 
-    alert(
-      error.response?.data?.message ||
-      "Failed to add receipt"
-    );
-  }
-};
+    const receiptAmount = Number(amount);
+
+    if (!Number.isFinite(receiptAmount) || receiptAmount <= 0) {
+      toast.error("Please enter a valid amount greater than zero");
+      return;
+    }
+
+    try {
+      setsubmitting(true);
+
+      const { data } = await axios.post(
+        `${backendURL}/detail/recipients/${id}`,
+        {
+          customerId: id,
+          customerName: customerName.trim(),
+          amount: receiptAmount,
+          fuelType,
+          vehicleNumber: vehicleNumber.trim().toUpperCase(),
+          paymentStatus,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (data.success) {
+        toast.success("Receipt added successfully");
+        navigate(`/user/view/${id}`);
+      } else {
+        toast.error(data.message || "Failed to add receipt");
+      }
+    } catch (error) {
+      console.error("ADD RECEIPT ERROR:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to add receipt"
+      );
+    } finally {
+      setsubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center p-6">
       <div className="w-full max-w-3xl bg-white shadow-2xl rounded-2xl overflow-hidden">
@@ -84,7 +101,7 @@ const [paymentStatus, setPaymentStatus] = useState("Pending");
                 type="text"
                 name="name"
                 value={customerName}
-                onChange={(e)=>setCustomerName(e.target.value)}
+                onChange={(e) => setCustomerName(e.target.value)}
                 placeholder="Enter customer name"
                 className="w-full border rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -100,7 +117,7 @@ const [paymentStatus, setPaymentStatus] = useState("Pending");
                 type="number"
                 name="amount"
                 value={amount}
-                onChange={(e)=>setAmount(e.target.value)}
+                onChange={(e) => setAmount(e.target.value)}
                 placeholder="Enter amount"
                 className="w-full border rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -115,10 +132,11 @@ const [paymentStatus, setPaymentStatus] = useState("Pending");
                 type="number"
                 name="fuelType"
                 value={fuelType}
-                onChange={(e)=>setfueltype(e.target.value)}
+                onChange={(e) => setfueltype(e.target.value)}
                 placeholder="Enter quantity"
                 className="w-full border rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500"
               >
+                <option value="">Select fuel type</option>
                 <option value="Petrol">Petrol</option>
                 <option value="Diesel">Diesel</option>
 
@@ -134,7 +152,7 @@ const [paymentStatus, setPaymentStatus] = useState("Pending");
                 type="text"
                 name="vehicleNumber"
                 value={vehicleNumber}
-                onChange={(e)=>setVehicleNumber(e.target.value)}
+                onChange={(e) => setVehicleNumber(e.target.value)}
                 placeholder="Enter vehicle number"
                 className="w-full border rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -149,7 +167,7 @@ const [paymentStatus, setPaymentStatus] = useState("Pending");
             <select
               name="status"
               value={paymentStatus}
-              onChange={(e)=>setPaymentStatus(e.target.value)}
+              onChange={(e) => setPaymentStatus(e.target.value)}
               className="w-full border rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="Pending">
@@ -161,12 +179,18 @@ const [paymentStatus, setPaymentStatus] = useState("Pending");
             </select>
           </div>
           {/* Button */}
+
           <button
             type="submit"
-            className="mt-8 w-full bg-gradient-to-r from-blue-200 to-blue-700 text-white py-3 rounded-xl font-bold text-lg hover:scale-[1.02] transition duration-300"
+            disabled={submitting}
+            className={`mt-8 w-full py-3 rounded-xl font-bold text-lg text-white transition duration-300 ${submitting
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-blue-200 to-blue-700 hover:scale-[1.02]"
+              }`}
           >
-            Add Customer Recipt
+            {submitting ? "Adding Receipt..." : "Add Customer Receipt"}
           </button>
+
         </form>
       </div>
     </div>

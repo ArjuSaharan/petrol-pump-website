@@ -162,7 +162,7 @@ const OneCustomer = () => {
     })
     return (
 
-        <div className="p-5">
+        <div className="min-h-screen p-5 pt-8">
             <h1 className="py-5 px-5 text-3xl font-bold text-black text-center">
                 Account Details of {customer.name}
             </h1>
