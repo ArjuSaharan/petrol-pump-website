@@ -210,7 +210,8 @@ const GenerateBill = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 print:static print:block print:bg-white print:p-0">
       {!generatedBill && (
-        <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl print:hidden">
+        <div id="print-bill"
+          className="max-h-[95vh] w-100 max-w-5xl overflow-y-auto rounded-xl bg-white p-8 shadow-2xl print:max-h-none print:w-full print:max-w-none print:overflow-visible print:rounded-none print:p-0 print:shadow-none">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-800">
               Generate Bill
@@ -221,7 +222,7 @@ const GenerateBill = ({
             </button>
           </div>
 
-          <div className="mb-6 rounded-xl bg-gray-100 p-4">
+          <div className="mb-6 w0 rounded-xl bg-gray-100 p-4">
             <h3 className="text-lg font-bold">{customer?.name}</h3>
             <p className="text-sm text-gray-600">
               Phone: {customer?.phone}
@@ -393,10 +394,10 @@ const GenerateBill = ({
               </table>
 
               <div className="ml-auto max-w-sm space-y-2 border-t-2 border-gray-800 pt-4">
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                   <span>Opening Balance</span>
                   <span>₹{balanceLabel(generatedBill.openingBalance)}</span>
-                </div>
+                </div> */}
                 <div className="flex justify-between">
                   <span>Total Debit</span>
                   <span>₹{money(generatedBill.debitTotal)}</span>
@@ -456,7 +457,7 @@ const GenerateBill = ({
             <button
               type="button"
               onClick={handlePrint}
-              className="flex items-center gap-2 rounded-lg bg-green-600 px-5 py-3 font-semibold text-white"
+              className="flex items-center gap-2 rounded-lg bg-green-600 px-5 py-3 font-semibold text-white print:hidden"
             >
               <FaPrint /> Print Bill
             </button>

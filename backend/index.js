@@ -2,7 +2,7 @@ import express from 'express'
 import cookieParser from 'cookie-parser';
 import authroute from './routes/authroutes.js';
 import useroute from './routes/userroute.js';
-import cors from 'cors';
+import cors from 'cors'
 import customerRoute from './routes/customerroute.js';
 import recipentRoutes from './routes/recieptRoutes.js'
 import paymentRoutes from './routes/paymentRoutes.js';

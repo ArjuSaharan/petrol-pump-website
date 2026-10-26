@@ -1,1 +1,70 @@
 @import "tailwindcss";
+
+
+
+@media print {
+  /* Hide the entire webpage */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* Show only the bill */
+  #print-bill,
+  #print-bill * {
+    visibility: visible !important;
+  }
+
+  /* Remove modal positioning and scrolling */
+  #print-bill {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 5mm !important;
+    background: white !important;
+    color: black !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Hide buttons */
+  #print-bill button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Print tables properly */
+  #print-bill table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 10pt !important;
+  }
+
+  #print-bill th,
+  #print-bill td {
+    border: 1px solid #777 !important;
+    padding: 6px !important;
+    color: black !important;
+  }
+
+  #print-bill thead {
+    display: table-header-group;
+  }
+
+  #print-bill tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Remove unwanted page margins */
+  @page {
+    size: A4;
+    margin: 5mm;
+  }
+}
