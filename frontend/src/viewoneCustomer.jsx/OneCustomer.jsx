@@ -291,7 +291,7 @@ const OneCustomer = () => {
                                                 filterRecipets.map((receipt) => {
                                                     return (<tr key={receipt._id} className="border-b hover:bg-gray-200 text-gray-700">
                                                         <td className="py-3 px-4 text-center">
-                                                            {new Date(receipt.createdAt).toLocaleDateString()}
+                                                            {new Date(receipt.createdAt).toLocaleDateString("en-GB")}
                                                         </td>
                                                         <td className="px-3 py-4 text-center">
                                                             {receipt.fuelType}
