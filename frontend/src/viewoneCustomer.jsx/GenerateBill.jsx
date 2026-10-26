@@ -165,7 +165,7 @@ const GenerateBill = ({
       ...paymentTransactions,
     ].sort((a, b) => a.date - b.date);
 
-    let runningBalance = openingBalance;
+    let runningBalance = 0;
 
     const ledgerRows = transactions.map((item) => {
       runningBalance += item.debit - item.credit;
@@ -318,12 +318,12 @@ const GenerateBill = ({
 
           {generatedBill.billType === "ledger" && (
             <>
-              <div className="mb-3 flex justify-between border-y border-gray-400 py-3 text-sm font-semibold">
+              {/* <div className="mb-3 flex justify-between border-y border-gray-400 py-3 text-sm font-semibold">
                 <span>Opening Balance</span>
                 <span>
                   ₹{balanceLabel(generatedBill.openingBalance)}
                 </span>
-              </div>
+              </div> */}
 
               <table className="mb-5 w-full border-collapse text-xs sm:text-sm">
                 <thead>
