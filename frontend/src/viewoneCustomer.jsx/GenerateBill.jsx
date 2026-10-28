@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaTimes, FaPrint } from "react-icons/fa";
-
+import logo from '../assets/logo.png';
 const GenerateBill = ({
   customer,
   receipts = [],
@@ -277,9 +277,22 @@ const GenerateBill = ({
           id="print-bill"
           className="max-h-[95vh] w-full max-w-5xl overflow-y-auto rounded-xl bg-white p-8 shadow-2xl print:max-h-none print:w-full print:max-w-none print:overflow-visible print:rounded-none print:p-4 print:shadow-none"
         >
+          <div className="flex px-2 py-2 items-center justify-between text-sm">
+            <div>
+            <p>Mobile no: +91 9728770412</p>
+            <p>Mobile no: +91 967211229</p>
+          </div>
+          <div>
+            <img src={logo} className="h-30 w-20"/>
+            </div>
+          <div>
+            <p>Reg no: 06EOGPS2664J1ZH</p>
+            <p>Account no : 99999467211229</p>
+            </div>
+          </div>
           <div className="mb-5 border-b-2 border-gray-800 pb-4 text-center">
             <h1 className="text-3xl font-bold uppercase">
-              Bishnoi Fuel Station
+              Bishnoi Fuel 
             </h1>
             <p className="text-sm text-gray-600">
               Fatehabad Road Aherwan (Fatehabad)
